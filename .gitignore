@@ -1,0 +1,11 @@
+# Sensitive configuration with API keys
+config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
