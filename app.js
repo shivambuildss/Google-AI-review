@@ -5,9 +5,40 @@
  * ============================================================
  */
 
+/* ── Fallback configuration in case config.js is not loaded ── */
+if (typeof window.CAFE_CONFIG === "undefined") {
+  window.CAFE_CONFIG = {
+    businessName: "Cafe Avalon",
+    businessType: "Coffee Shop",
+    address: "Opposite Rane Complex, CIDCO Waluj Mahanagar 1, Tisgaon, Chhatrapati Sambhajinagar, Maharashtra 431136",
+    googleReviewUrl: "GOOGLE_REVIEW_URL_PLACEHOLDER",
+    supportedLanguages: ["en", "hi", "mr"],
+    defaultLanguage: "en",
+    serviceOptionKeys: ["excellent", "good", "average", "slow", "unfriendly"],
+    standoutKeys: ["coffeeQuality", "foodQuality", "friendlyStaff", "cleanliness", "ambience", "quickService", "goodValue", "presentation"],
+    geminiApiKey: "",
+    geminiModel: "gemini-2.5-flash",
+    useRealAI: false,
+    draftCount: 3,
+    appVersion: "1.0.0",
+    buildNote: "Fallback mode"
+  };
+}
+
+// Check if user has an API key saved in localStorage
+try {
+  const savedKey = localStorage.getItem("cafe_gemini_api_key");
+  if (savedKey && savedKey.trim()) {
+    window.CAFE_CONFIG = Object.assign({}, window.CAFE_CONFIG, {
+      geminiApiKey: savedKey.trim(),
+      useRealAI: true
+    });
+  }
+} catch (e) {}
+
 /* ── State ───────────────────────────────────────────────── */
 const state = {
-  lang:          CAFE_CONFIG.defaultLanguage,
+  lang:          (window.CAFE_CONFIG && window.CAFE_CONFIG.defaultLanguage) || "en",
   currentStep:   1,
   stars:         0,
   orderedItem:   "",   // what the customer ordered (short text)
@@ -535,6 +566,31 @@ function bindEvents() {
       showToast("⚠ Google Review URL not yet configured");
     }
   });
+
+  // Badge: click to enter API key or toggle demo mode
+  if (DOM.mockBadge) {
+    DOM.mockBadge.style.cursor = "pointer";
+    DOM.mockBadge.title = "Click to configure Gemini API Key";
+    DOM.mockBadge.addEventListener("click", () => {
+      const currentKey = (window.CAFE_CONFIG && window.CAFE_CONFIG.geminiApiKey) || "";
+      const input = prompt("Enter your Gemini API Key (or leave empty for Demo/Mock mode):", currentKey);
+      if (input !== null) {
+        const trimmed = input.trim();
+        if (trimmed) {
+          try { localStorage.setItem("cafe_gemini_api_key", trimmed); } catch (e) {}
+          window.CAFE_CONFIG.geminiApiKey = trimmed;
+          window.CAFE_CONFIG.useRealAI = true;
+          showToast("✨ Gemini AI mode enabled!");
+        } else {
+          try { localStorage.removeItem("cafe_gemini_api_key"); } catch (e) {}
+          window.CAFE_CONFIG.geminiApiKey = "";
+          window.CAFE_CONFIG.useRealAI = false;
+          showToast("Demo mode enabled!");
+        }
+        renderAll();
+      }
+    });
+  }
 }
 
 /* ── Star hover helpers ──────────────────────────────────── */

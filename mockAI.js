@@ -74,8 +74,9 @@ OUTPUT FORMAT — respond with ONLY a raw JSON array, no markdown, no code fence
  * Calls the Gemini generateContent REST API.
  */
 async function callGeminiAPI({ lang, stars, orderedItem, serviceRating, standouts, businessName }) {
-  const apiKey = CAFE_CONFIG.geminiApiKey;
-  const model  = CAFE_CONFIG.geminiModel || "gemini-2.0-flash";
+  const config = window.CAFE_CONFIG || {};
+  const apiKey = config.geminiApiKey;
+  const model  = config.geminiModel || "gemini-2.5-flash";
   const url    = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const prompt = buildGeminiPrompt({ lang, stars, orderedItem, serviceRating, standouts, businessName });
@@ -349,9 +350,13 @@ function buildOfflineDrafts(lang, stars, orderedItem, serviceRating, standouts, 
  * @returns {Promise<Array<{tone: string, text: string}>>}
  */
 async function generateDrafts({ lang, stars, orderedItem, serviceRating, standouts, businessName }) {
-  if (CAFE_CONFIG.useRealAI) {
+  const config = window.CAFE_CONFIG || {};
+  const apiKey = (config.geminiApiKey || "").trim();
+  const hasRealKey = Boolean(apiKey && !apiKey.includes("YOUR_") && apiKey.length > 10);
+
+  if (config.useRealAI && hasRealKey) {
     return callGeminiAPI({ lang, stars, orderedItem, serviceRating, standouts, businessName });
   }
-  await new Promise(resolve => setTimeout(resolve, 1400));
+  await new Promise(resolve => setTimeout(resolve, 800));
   return buildOfflineDrafts(lang, stars, orderedItem, serviceRating, standouts, businessName);
 }
