@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0d0b" />
+
+  <title>Leave a Review — Cafe Avalon</title>
+  <meta name="description" content="Share your honest experience at Cafe Avalon, Chhatrapati Sambhajinagar. Your feedback helps us grow and helps others choose their next coffee stop." />
+
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Config must load first so app.js can read it -->
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="mockAI.js"></script>
+</head>
+<body>
+
+<div id="app" role="main">
+
+  <!-- ── Language Bar ─────────────────────────────────────── -->
+  <nav id="lang-bar" aria-label="Language selector">
+    <!-- Built by JS -->
+  </nav>
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <header id="header">
+    <div class="header-icon" role="img" aria-label="Coffee cup icon">☕</div>
+    <h1 class="business-name">Cafe Avalon</h1>
+    <p class="header-tagline" id="header-tagline">How was your visit?</p>
+    <p class="header-subtitle" id="header-subtitle">Help others discover us by sharing your experience.</p>
+    <div id="mock-badge" role="note" aria-label="Demo mode indicator">Demo — Mock AI</div>
+  </header>
+
+  <!-- ── Progress Stepper ─────────────────────────────────── -->
+  <nav id="stepper" aria-label="Progress steps">
+    <div class="step-item active" id="stepper-1" aria-current="step">
+      <div class="step-dot"><span class="step-number">1</span></div>
+      <span class="step-label">Your Rating</span>
+    </div>
+    <div class="step-item" id="stepper-2">
+      <div class="step-dot"><span class="step-number">2</span></div>
+      <span class="step-label">Your Experience</span>
+    </div>
+    <div class="step-item" id="stepper-3">
+      <div class="step-dot"><span class="step-number">3</span></div>
+      <span class="step-label">Review Drafts</span>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 1 — Star Rating
+  ══════════════════════════════════════════════════════ -->
+  <section id="step-1" class="step-panel active" aria-label="Step 1: Rate your visit">
+
+    <div class="card">
+      <p class="card-title" id="rating-prompt">Tap the stars to rate your visit</p>
+
+      <div id="star-rating-group" role="radiogroup" aria-label="Star rating" aria-required="true">
+        <button class="star-btn" role="radio" aria-checked="false" aria-label="1 star" data-value="1" id="star-1">★</button>
+        <button class="star-btn" role="radio" aria-checked="false" aria-label="2 stars" data-value="2" id="star-2">★</button>
+        <button class="star-btn" role="radio" aria-checked="false" aria-label="3 stars" data-value="3" id="star-3">★</button>
+        <button class="star-btn" role="radio" aria-checked="false" aria-label="4 stars" data-value="4" id="star-4">★</button>
+        <button class="star-btn" role="radio" aria-checked="false" aria-label="5 stars" data-value="5" id="star-5">★</button>
+      </div>
+
+      <div id="rating-label" aria-live="polite"></div>
+      <div id="star-value-display" aria-live="polite"></div>
+
+      <p class="field-error" id="rating-error" role="alert"></p>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-primary" id="next-step-1" aria-label="Continue to step 2">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Next →</span>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 2 — Structured Experience Input
+  ══════════════════════════════════════════════════════ -->
+  <section id="step-2" class="step-panel" aria-label="Step 2: Tell us about your visit">
+
+    <div class="card">
+      <h2 class="card-title" id="exp-title">Tell us about your visit</h2>
+
+      <!-- 1. What did you order? (only typed input) -->
+      <div class="field-group">
+        <label class="field-label" for="order-input" id="order-label">What did you order?</label>
+        <p class="field-hint" id="order-hint">Just the item name is fine — e.g. Cappuccino, Cold Coffee</p>
+        <input
+          type="text"
+          id="order-input"
+          class="order-input"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="e.g. Cappuccino"
+          aria-required="true"
+          aria-describedby="order-error"
+        />
+        <p class="field-error" id="order-error" role="alert"></p>
+      </div>
+
+      <!-- 2. How was the service? (single-select) -->
+      <div class="field-group" id="service-section">
+        <p class="field-sub-label" id="service-label">How was the service?</p>
+        <div id="service-chips" role="radiogroup" aria-label="Service rating">
+          <!-- Built by JS -->
+        </div>
+      </div>
+
+      <!-- 3. What stood out? (multi-select, optional) -->
+      <div class="field-group" id="standout-section">
+        <p class="field-sub-label" id="standout-label">
+          What stood out? <span class="optional-tag" id="standout-optional">(optional)</span>
+        </p>
+        <div id="standout-grid" role="group" aria-label="What stood out">
+          <!-- Built by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary btn-ghost" id="back-step-2" aria-label="Back to step 1">← Back</button>
+      <button class="btn btn-primary" id="generate-btn" aria-label="Generate review drafts">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Generate Review Drafts</span>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       STEP 3 — Drafts + Google CTA
+  ══════════════════════════════════════════════════════ -->
+  <section id="step-3" class="step-panel" aria-label="Step 3: Review drafts">
+
+    <!-- Back button row -->
+    <div class="nav-row" style="margin-bottom:12px;">
+      <button class="btn btn-ghost" id="back-step-3" aria-label="Back to step 2">← Back</button>
+    </div>
+
+    <!-- Drafts header -->
+    <div class="drafts-header-card">
+      <h2 id="drafts-header-title">Your Review Drafts</h2>
+      <p id="drafts-header-sub">Three versions based on what you told us. Pick the one that feels right — or edit it to make it yours.</p>
+    </div>
+
+    <!-- Generating spinner (shown while AI runs) -->
+    <div id="generating-overlay" role="status" aria-live="polite">
+      <div class="gen-spinner" aria-hidden="true"></div>
+      <p class="gen-text" id="generating-text">Generating drafts…</p>
+    </div>
+
+    <!-- Draft cards rendered by JS -->
+    <div id="drafts-container" aria-label="Generated review drafts"></div>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <!-- Google Review CTA -->
+    <div id="google-cta" style="display:none;" aria-label="Post your review on Google">
+      <p class="cta-title" id="cta-title">Ready to post?</p>
+      <p class="cta-subtitle" id="cta-subtitle">Copy your chosen draft, then click the button below to open Google Reviews.</p>
+
+      <a
+        id="google-review-btn"
+        class="btn-google"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open Google Reviews for Cafe Avalon"
+      >
+        <!-- Google "G" SVG icon -->
+        <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span id="google-btn-label">Open Google Reviews →</span>
+      </a>
+
+      <p id="url-missing-note" class="url-missing-note" style="display:none;" role="note"></p>
+      <p id="reminder-note" class="reminder-note" role="note"></p>
+    </div>
+
+    <!-- Start over -->
+    <div id="start-over-row" style="display:none; text-align:center; margin-top:24px;">
+      <button class="btn btn-ghost" id="start-over-btn" aria-label="Start a new review">Start over</button>
+    </div>
+
+  </section>
+
+</div><!-- /#app -->
+
+<!-- ── Toast notification ─────────────────────────────────── -->
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ── Footer ────────────────────────────────────────────────-->
+<footer id="footer" aria-label="Footer">
+  <span id="footer-business" class="business-name" style="font-family:inherit; font-size:inherit; background:none; -webkit-text-fill-color:inherit; color:inherit; opacity:0.4;">Cafe Avalon</span>
+  &nbsp;·&nbsp; AI Review Assistant &nbsp;·&nbsp; v1.0-mock
+</footer>
+
+<!-- App scripts (after DOM) -->
+<script src="app.js"></script>
+
+</body>
+</html>
